@@ -65,6 +65,10 @@ $color-primary:         #00bceb;
   }
   }
 
+  .y-axis .tick {
+    display: none;
+  }
+
   .x-axis path{
      display: none;
   }
