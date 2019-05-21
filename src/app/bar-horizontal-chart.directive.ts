@@ -136,37 +136,38 @@ export class BarHorizontalChartDirective implements OnInit, OnChanges {
     const percentText = g.append('g').classed('textArea', true).selectAll('.text').data(this.data).enter()
       .append('g').attr('class', 'text');
 
-      const numericText = g.append('g').classed('textArea', true).selectAll('.text').data(this.data).enter()
+    const numericText = g.append('g').classed('textArea', true).selectAll('.text').data(this.data).enter()
       .append('g').attr('class', 'text');
 
     percentText.append('text').attr('class', 'barText')
       .attr('x', function (d) {
-        return x(d.percentValue);
+        return x(d.percentValue) + 10;
       })
 
       .attr('y', function (d) {
         return (y(d.name) + (y.bandwidth()) / 2) + 5;
       }).text(function (d) {
-        if (self.getTextWidth(d.numericValue + ' ', 10, 'CiscoSans') > x(d.percentValue)) {
-          return '('+d.numericValue+') ' + d.percentValue;
+        if ((self.getTextWidth(d.numericValue + ' ', 10, 'CiscoSans') + 20) > x(d.percentValue)) {
+          return '(' + d.numericValue + ') ' + d.percentValue + '%';
         }
         return d.percentValue + '%';
       });
 
-      numericText.append('text').attr('class', 'barText')
+    numericText.append('text').attr('class', 'barText')
       .attr('x', function (d) {
-        return x(d.percentValue) - self.getTextWidth(d.numericValue + ' ', 10, 'CiscoSans');
+        return x(d.percentValue) - self.getTextWidth(d.numericValue + ' ', 10, 'CiscoSans') - 20;
       })
 
       .attr('y', function (d) {
         return (y(d.name) + (y.bandwidth()) / 2) + 5;
       }).text(function (d) {
-        if (self.getTextWidth(d.numericValue + '', 10, 'CiscoSans') <= x(d.percentValue)) {
+        console.log("1", self.getTextWidth(d.numericValue + '', 10, 'CiscoSans'), "\n 2", x(d.percentValue))
+        if ((self.getTextWidth(d.numericValue + '', 10, 'CiscoSans') + 20) <= x(d.percentValue)) {
           return d.numericValue
         }
       });
 
-      g.call(this.tip);
+    g.call(this.tip);
     g.call(this.labelTip);
     /* X axis labels are moved down*/
     g.selectAll(".x-axis text")
