@@ -148,7 +148,10 @@ export class BarHorizontalChartDirective implements OnInit, OnChanges {
         return (y(d.name) + (y.bandwidth()) / 2) + 5;
       }).text(function (d) {
         if ((self.getTextWidth(d.numericValue + ' ', 10, 'CiscoSans') + 20) > x(d.percentValue)) {
-          return '(' + d.numericValue + ') ' + d.percentValue + '%';
+          let t = d.numericValue +'';
+          t = t.replace(/\D/g, "")
+            .replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+          return '(' + t + ') ' + d.percentValue + '%';
         }
         return d.percentValue + '%';
       });
@@ -163,7 +166,10 @@ export class BarHorizontalChartDirective implements OnInit, OnChanges {
       }).text(function (d) {
         console.log("1", self.getTextWidth(d.numericValue + '', 10, 'CiscoSans'), "\n 2", x(d.percentValue))
         if ((self.getTextWidth(d.numericValue + '', 10, 'CiscoSans') + 20) <= x(d.percentValue)) {
-          return d.numericValue
+          let t = d.numericValue +'';
+          t = t.replace(/\D/g, "")
+            .replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+          return t;
         }
       });
 
