@@ -3,10 +3,12 @@ import { NgModule } from '@angular/core';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
+import { BarHorizontalChartDirective } from './bar-horizontal-chart.directive';
 
 @NgModule({
   declarations: [
-    AppComponent
+    AppComponent,
+    BarHorizontalChartDirective
   ],
   imports: [
     BrowserModule,

@@ -1,1 +1,84 @@
 /* You can add global styles to this file, and also import other style files */
+$border-color:            #bbb !default;
+$color-primary:         #00bceb;
+
+.x.axis{
+    font-size: 12px;
+    font-family: CiscoSans;
+    font-weight:  400;
+  }
+  
+  .y.axis{
+    .tick {
+      text{
+        font-size:12px;
+      }
+    }
+  
+  }
+
+  .tick {
+    line {
+      opacity: 0.7;
+    }
+  }
+
+  .addPopUp {
+    &__title {
+      font-size: 1rem;
+      font-weight: bold;
+    }
+  
+    &__list {
+      list-style: none;
+      padding-left: 0;
+      margin-bottom: 0;
+    }
+    &__item {
+      font-size: 0.75rem;
+      .lbl {
+        width: 50%;
+        float: left;
+      }
+      .val {
+        width: 50%;
+        float: left;
+        text-align: right;
+        cursor: text;
+        //color: $color-primary;
+      }
+      &::after {
+        // @extend %clearfix;  
+      }
+    }
+  }
+  
+  g {
+    .bar {
+      cursor: pointer;
+    }
+  }
+
+  .y-axis { 
+    text {
+    font-size: 0.75rem;
+  }
+  }
+
+  .x-axis path{
+     display: none;
+  }
+
+  .axis line,.axis path {
+    stroke: $border-color;
+  }
+  
+  /* The text above bars are so light so I am making it little thick*/
+  .barText {
+    font-weight: 500 !important;
+  }  
+  
+  .back{
+    opacity: 0.3;
+  }
+  
