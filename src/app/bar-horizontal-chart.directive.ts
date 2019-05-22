@@ -12,12 +12,14 @@ export class BarHorizontalChartDirective implements OnInit, OnChanges {
   @Input() width = 459;
   @Input() height = 252;
   @Input() margin = { top: 50, right: 20, bottom: 50, left: 100 };
-  @Input() data = [{ 'name': 'Australia', 'percentValue': 68, 'numericValue': 12755 },
+  @Input() data = [{ 'name': 'Australia', 'percentValue': 95, 'numericValue': 12755 },
   { 'name': 'South Africa', 'percentValue': 58, 'numericValue': 11454 },
   { 'name': 'New Zealand', 'percentValue': 7, 'numericValue': 1822 }
   ];
   @Input() colors = ['#C3CE3D', '#67C1BA', '#0E709E'];
   @Output() OutputBarData: EventEmitter<any> = new EventEmitter();
+  public x: any;
+  public y: any;
 
   public tip = d3Tip()
     .attr('class', 'addPopUp')
@@ -25,7 +27,7 @@ export class BarHorizontalChartDirective implements OnInit, OnChanges {
     .html((d) => {
       return '<div class="customPopover"> <div class="content" style="background-color:fff;">' +
         // tslint:disable-next-line:max-line-length
-        '<ul class="addPopUp__list"><li class="addPopUp__item"><span class="lbl">' + d.name + '</span><span class="val">' + d.percentValue + '</span></li></div></div>';
+        '<ul class="addPopUp__list"><li class="addPopUp__item"><span class="lbl">' + d.name + '</span><span class="val">' + d.percentValue + '%</span></li></div></div>';
     });
 
   public labelTip = d3Tip()
@@ -72,27 +74,26 @@ export class BarHorizontalChartDirective implements OnInit, OnChanges {
 
     // let tooltip = d3.select("body").attr("class", "addPopUp");
 
-    let x = d3.scaleLinear().range([0, width]);
-    let y = d3.scaleBand().range([height, 0]);
+    this.x = d3.scaleLinear().range([0, width]);
+    this.y = d3.scaleBand().range([height, 0]);
 
     let g = svg.append("g")
       .attr("transform", "translate(" + this.margin.left + "," + this.margin.top + ")");
 
-    x.domain([0, 100]);
-    y.domain(this.data.map(function (d) { return d.name; })).padding(0.1);
+    this.x.domain([0, 100]);
+    this.y.domain(this.data.map(function (d) { return d.name; })).padding(0.1);
 
     g.append("g")
       .attr("class", "x-axis axis")
       .attr("transform", "translate(0," + height + ")")
-      .call(d3.axisBottom(x).ticks(5).tickFormat(function (d) {
-
+      .call(d3.axisBottom(this.x).ticks(5).tickFormat(function (d) {
         return d + '%';
       }).tickSizeInner([-height]).tickSizeOuter(0));
 
     g.append("g")
       .attr("class", "y-axis axis")
       .attr("transform", "translate(0,0)")
-      .call(d3.axisLeft(y).tickFormat(function (d) {
+      .call(d3.axisLeft(this.y).tickFormat(function (d) {
         return (d.length > 14) ? d.substring(0, 18) + '...' : d;
       }).tickSizeInner([-width]).tickSizeOuter(0)); /*tickSizeOuter(0) is used to remove starting and ending tick lines of axis*/
 
@@ -106,10 +107,10 @@ export class BarHorizontalChartDirective implements OnInit, OnChanges {
 
     bars.append("rect")
       .attr("class", "bar")
-      .attr("x", x(0))
-      .attr("height", Math.min(y.bandwidth() - 2, 25))
-      .attr("y", function (d) { return y(d.name) + (y.bandwidth() - 25) / 2; })
-      .attr("width", function (d) { return x(d.percentValue); })
+      .attr("x", this.x(0))
+      .attr("height", Math.min(this.y.bandwidth() - 2, 25))
+      .attr("y", function (d) { return self.y(d.name) + (self.y.bandwidth() - 25) / 2; })
+      .attr("width", function (d) { return self.x(d.percentValue); })
       .attr('fill', (d, i) => self.colors[i])
       .on("mouseover", function (d) {
         self.tip.show(d, this);
@@ -121,56 +122,62 @@ export class BarHorizontalChartDirective implements OnInit, OnChanges {
 
     bars.append('rect').attr('class', 'back')
       .attr('x', function (d) {
-        return x(d.percentValue);
+        return self.x(d.percentValue);
       })
-      .attr("height", Math.min(y.bandwidth() - 2, 25))
-      .attr('y', function (d) { return y(d.name) + (y.bandwidth() - 25) / 2; })
+      .attr("height", Math.min(this.y.bandwidth() - 2, 25))
+      .attr('y', function (d) { return self.y(d.name) + (self.y.bandwidth() - 25) / 2; })
       .attr('width', function (d) {
-        return x(100 - d.percentValue);
+        return self.x(100 - d.percentValue);
       })
       .attr('fill', function (d) {
         return '#DFDFDF';
       });
 
-    /* -- logic to add the text above rectangle starts -- */
-    const percentText = g.append('g').classed('textArea', true).selectAll('.text').data(this.data).enter()
+    const RestoftheText = g.append('g').classed('textArea', true).selectAll('.text').data(this.data).enter()
       .append('g').attr('class', 'text');
 
-    const numericText = g.append('g').classed('textArea', true).selectAll('.text').data(this.data).enter()
+    const numericTextOnly = g.append('g').classed('textArea', true).selectAll('.text').data(this.data).enter()
       .append('g').attr('class', 'text');
 
-    percentText.append('text').attr('class', 'barText')
+    RestoftheText.append('text')
+      .attr('class', 'barText')
       .attr('x', function (d) {
-        return x(d.percentValue) + 10;
-      })
-
-      .attr('y', function (d) {
-        return (y(d.name) + (y.bandwidth()) / 2) + 5;
+        if (self.barSize(d) === 'smallerBarLength' || self.barSize(d) === 'perfectBarLength') {
+          return self.x(d.percentValue) + 10;
+        }
+        else {
+          return self.x(d.percentValue) - 50 - self.getTextWidth('(' + d.numericValue + ')', 10, 'CiscoSans') - self.getTextWidth('(' + d.percentValue + ')', 10, 'CiscoSans');
+        }
+      }).attr('y', function (d) {
+        return (self.y(d.name) + (self.y.bandwidth()) / 2) + 5;
       }).text(function (d) {
-        if ((self.getTextWidth(d.numericValue + ' ', 10, 'CiscoSans') + 20) > x(d.percentValue)) {
-          let t = d.numericValue +'';
+        if (self.barSize(d) === 'smallerBarLength' || self.barSize(d) === 'longerBarLength') {
+          let t = d.numericValue + '';
           t = t.replace(/\D/g, "")
             .replace(/\B(?=(\d{3})+(?!\d))/g, ",");
           return '(' + t + ') ' + d.percentValue + '%';
         }
         return d.percentValue + '%';
+      }).attr('fill', function (d) {
+        if (self.barSize(d) === 'longerBarLength') {
+          return '#FFFFFF';
+        }
       });
 
-    numericText.append('text').attr('class', 'barText')
+    numericTextOnly.append('text').attr('class', 'barText')
       .attr('x', function (d) {
-        return x(d.percentValue) - self.getTextWidth(d.numericValue + ' ', 10, 'CiscoSans') - 20;
-      })
-
-      .attr('y', function (d) {
-        return (y(d.name) + (y.bandwidth()) / 2) + 5;
+        return self.x(d.percentValue) - self.getTextWidth(d.numericValue + ' ', 10, 'CiscoSans') - 20;
+      }).attr('y', function (d) {
+        return (self.y(d.name) + (self.y.bandwidth()) / 2) + 5;
       }).text(function (d) {
-        console.log("1", self.getTextWidth(d.numericValue + '', 10, 'CiscoSans'), "\n 2", x(d.percentValue))
-        if ((self.getTextWidth(d.numericValue + '', 10, 'CiscoSans') + 20) <= x(d.percentValue)) {
-          let t = d.numericValue +'';
+        if (self.barSize(d) === 'perfectBarLength') {
+          let t = d.numericValue + '';
           t = t.replace(/\D/g, "")
             .replace(/\B(?=(\d{3})+(?!\d))/g, ",");
           return t;
         }
+      }).attr('fill', function (d) {
+        return '#FFFFFF';
       });
 
     g.call(this.tip);
@@ -190,6 +197,21 @@ export class BarHorizontalChartDirective implements OnInit, OnChanges {
     var context = canvas.getContext('2d');
     context.font = fontSize + 'px ' + fontFace;
     return context.measureText(text).width;
+  }
+
+  barSize(d) {
+    let numericValueLength = this.getTextWidth('(' + d.numericValue + ')', 10, 'CiscoSans');
+    let percentValueLength = this.getTextWidth('(' + d.percentValue + ')', 10, 'CiscoSans');
+
+    if (this.x(d.percentValue) < (numericValueLength + 15)) { /* bar width is less than the space required for numeric value */
+      return 'smallerBarLength';
+    }
+    else if (this.x(100) < (this.x(d.percentValue) + percentValueLength + 20)) { /* the total width is less than the sum of bar width and the space required for percent value */
+      return 'longerBarLength';
+    }
+    else {
+      return 'perfectBarLength';
+    }
   }
 }
 
