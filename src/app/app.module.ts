@@ -4,11 +4,12 @@ import { NgModule } from '@angular/core';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { BarHorizontalChartDirective } from './bar-horizontal-chart.directive';
-
+import { MultipleBarChartDirective } from './multiple-bar-chart.directive';
 @NgModule({
   declarations: [
     AppComponent,
-    BarHorizontalChartDirective
+    BarHorizontalChartDirective,
+    MultipleBarChartDirective
   ],
   imports: [
     BrowserModule,
